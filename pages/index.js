@@ -7,8 +7,9 @@ export default function Home() {
     const [contract, setContract] = useState(null);
     const [proposals, setProposals] = useState([]);
     const [address, setAddress] = useState("");
+    const [loading, setLoading] = useState(true);
 
-    const contractAddress = "DEPLOYED_CONTRACT_ADDRESS";
+    const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138"; 
     const abi = [
         "function createProposal(string description) public",
         "function vote(uint proposalId) public",
@@ -17,44 +18,79 @@ export default function Home() {
 
     useEffect(() => {
         const initBlockchain = async () => {
-            const _provider = new ethers.providers.Web3Provider(window.ethereum);
-            const _signer = _provider.getSigner();
-            const _contract = new ethers.Contract(contractAddress, abi, _signer);
+            try {
+                if (typeof window.ethereum !== "undefined") {
+                    await window.ethereum.request({ method: "eth_requestAccounts" });
 
-            setProvider(_provider);
-            setSigner(_signer);
-            setContract(_contract);
+                    const _provider = new ethers.providers.Web3Provider(window.ethereum);
+                    const _signer = _provider.getSigner();
+                    const _contract = new ethers.Contract(contractAddress, abi, _signer);
 
-            const userAddress = await _signer.getAddress();
-            setAddress(userAddress);
+                    const userAddress = await _signer.getAddress();
+                    setProvider(_provider);
+                    setSigner(_signer);
+                    setContract(_contract);
+                    setAddress(userAddress);
+                } else {
+                    alert("MetaMask is not installed! Please install it.");
+                }
+            } catch (error) {
+                console.error("Error initializing blockchain:", error);
+                alert("Failed to connect to MetaMask. Please try again.");
+            } finally {
+                setLoading(false);
+            }
         };
 
-        if (typeof window.ethereum !== "undefined") {
-            initBlockchain();
-        } else {
-            alert("MetaMask is not installed!");
-        }
+        initBlockchain();
     }, []);
 
     const createProposal = async () => {
-        const description = prompt("Enter proposal description:");
-        await contract.createProposal(description);
-        alert("Proposal created!");
+        try {
+            if (!contract) {
+                alert("Contract not initialized.");
+                return;
+            }
+            const description = prompt("Enter proposal description:");
+            if (!description) return;
+
+            const tx = await contract.createProposal(description);
+            await tx.wait(); 
+            alert("Proposal created successfully!");
+        } catch (error) {
+            console.error("Error creating proposal:", error);
+            alert("Failed to create proposal.");
+        }
     };
 
     const voteOnProposal = async () => {
-        const proposalId = prompt("Enter proposal ID to vote:");
-        await contract.vote(proposalId);
-        alert("Voted successfully!");
+        try {
+            if (!contract) {
+                alert("Contract not initialized.");
+                return;
+            }
+            const proposalId = prompt("Enter proposal ID to vote:");
+            if (!proposalId) return;
+
+            const tx = await contract.vote(proposalId);
+            await tx.wait(); 
+            alert("Vote submitted successfully!");
+        } catch (error) {
+            console.error("Error voting on proposal:", error);
+            alert("Failed to vote.");
+        }
     };
+
+    if (loading) {
+        return <p>Loading...</p>;
+    }
 
     return (
         <div>
             <h1>Smart City Platform</h1>
-            <p>Connected Address: {address}</p>
-
-            <button onClick={createProposal}>Create Proposal</button>
-            <button onClick={voteOnProposal}>Vote</button>
+            <p>Connected Address: {address || "Not connected"}</p>
+            <button onClick={createProposal} disabled={!contract}>Create Proposal</button>
+            <button onClick={voteOnProposal} disabled={!contract}>Vote</button>
         </div>
     );
 }
