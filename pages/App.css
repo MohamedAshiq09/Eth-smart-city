@@ -4,7 +4,7 @@ body {
     font-family: Arial, sans-serif;
     background: linear-gradient(to bottom right, #1f1c2c, #928dab);
     color: #fff;
-    height: 100vh;
+    height: 110vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -25,15 +25,17 @@ body {
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 20px;
-    color: #f3f3f3;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    color: black;
+    text-shadow: 0 4px 8px rgba(169, 169, 169, 0.8), 0 0 10px rgba(39, 37, 37, 0.514);
+
+
 }
 
 
 .address {
     font-size: 1rem;
     margin-bottom: 30px;
-    color: #e0e0e0;
+    color: black;
 }
 
 
