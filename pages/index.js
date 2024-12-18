@@ -8,6 +8,7 @@ export default function Home() {
     const [contract, setContract] = useState(null);
     const [address, setAddress] = useState("");
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138"; 
     const abi = [
@@ -19,24 +20,33 @@ export default function Home() {
     useEffect(() => {
         const initBlockchain = async () => {
             try {
-                if (typeof window.ethereum !== "undefined") {
-                    await window.ethereum.request({ method: "eth_requestAccounts" });
-
-                    const _provider = new ethers.providers.Web3Provider(window.ethereum);
-                    const _signer = _provider.getSigner();
-                    const _contract = new ethers.Contract(contractAddress, abi, _signer);
-
-                    const userAddress = await _signer.getAddress();
-                    setProvider(_provider);
-                    setSigner(_signer);
-                    setContract(_contract);
-                    setAddress(userAddress);
-                } else {
-                    alert("MetaMask is not installed! Please install it.");
+                if (typeof window.ethereum === "undefined") {
+                    setError("MetaMask is not installed. Please install MetaMask to use this app.");
+                    setLoading(false);
+                    return;
                 }
-            } catch (error) {
-                console.error("Error initializing blockchain:", error);
-                alert("Failed to connect to MetaMask. Please try again.");
+
+                // Request accounts from MetaMask
+                await window.ethereum.request({ method: "eth_requestAccounts" });
+
+                // Initialize provider and signer
+                const _provider = new ethers.providers.Web3Provider(window.ethereum);
+                const _signer = _provider.getSigner();
+
+                // Connect to the contract
+                const _contract = new ethers.Contract(contractAddress, abi, _signer);
+
+                // Get the user's wallet address
+                const userAddress = await _signer.getAddress();
+
+                // Update states
+                setProvider(_provider);
+                setSigner(_signer);
+                setContract(_contract);
+                setAddress(userAddress);
+            } catch (err) {
+                console.error("Error initializing blockchain:", err);
+                setError("Failed to connect to MetaMask. Please ensure MetaMask is unlocked and you are on the correct network.");
             } finally {
                 setLoading(false);
             }
@@ -48,41 +58,45 @@ export default function Home() {
     const createProposal = async () => {
         try {
             if (!contract) {
-                alert("Contract not initialized.");
+                alert("Contract is not initialized.");
                 return;
             }
-            const description = prompt("Enter proposal description:");
+            const description = prompt("Enter the proposal description:");
             if (!description) return;
 
             const tx = await contract.createProposal(description);
-            await tx.wait(); 
+            await tx.wait(); // Wait for the transaction to be mined
             alert("Proposal created successfully!");
-        } catch (error) {
-            console.error("Error creating proposal:", error);
-            alert("Failed to create proposal.");
+        } catch (err) {
+            console.error("Error creating proposal:", err);
+            alert("Failed to create proposal. Please check the console for details.");
         }
     };
 
     const voteOnProposal = async () => {
         try {
             if (!contract) {
-                alert("Contract not initialized.");
+                alert("Contract is not initialized.");
                 return;
             }
-            const proposalId = prompt("Enter proposal ID to vote:");
+            const proposalId = prompt("Enter the proposal ID to vote:");
             if (!proposalId) return;
 
             const tx = await contract.vote(proposalId);
-            await tx.wait(); 
+            await tx.wait(); // Wait for the transaction to be mined
             alert("Vote submitted successfully!");
-        } catch (error) {
-            console.error("Error voting on proposal:", error);
-            alert("Failed to vote.");
+        } catch (err) {
+            console.error("Error voting on proposal:", err);
+            alert("Failed to submit vote. Please check the console for details.");
         }
     };
 
     if (loading) {
-        return <p className="loading">Loading...</p>;
+        return <p className="loading">Connecting to the blockchain...</p>;
+    }
+
+    if (error) {
+        return <p className="error">{error}</p>;
     }
 
     return (
