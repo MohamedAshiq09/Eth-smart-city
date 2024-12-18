@@ -26,20 +26,16 @@ export default function Home() {
                     return;
                 }
 
-                // Request accounts from MetaMask
+                
                 await window.ethereum.request({ method: "eth_requestAccounts" });
-
-                // Initialize provider and signer
+   
                 const _provider = new ethers.providers.Web3Provider(window.ethereum);
                 const _signer = _provider.getSigner();
 
-                // Connect to the contract
                 const _contract = new ethers.Contract(contractAddress, abi, _signer);
 
-                // Get the user's wallet address
                 const userAddress = await _signer.getAddress();
 
-                // Update states
                 setProvider(_provider);
                 setSigner(_signer);
                 setContract(_contract);
@@ -65,7 +61,7 @@ export default function Home() {
             if (!description) return;
 
             const tx = await contract.createProposal(description);
-            await tx.wait(); // Wait for the transaction to be mined
+            await tx.wait(); 
             alert("Proposal created successfully!");
         } catch (err) {
             console.error("Error creating proposal:", err);
@@ -83,7 +79,7 @@ export default function Home() {
             if (!proposalId) return;
 
             const tx = await contract.vote(proposalId);
-            await tx.wait(); // Wait for the transaction to be mined
+            await tx.wait(); 
             alert("Vote submitted successfully!");
         } catch (err) {
             console.error("Error voting on proposal:", err);
