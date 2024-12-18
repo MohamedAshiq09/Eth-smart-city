@@ -1,15 +1,28 @@
 const hre = require("hardhat");
 
 async function main() {
-    const SmartCity = await hre.ethers.getContractFactory("SmartCity");
-    const smartCity = await SmartCity.deploy();
+    try {
 
-    await smartCity.deployed();
+        const SmartCity = await hre.ethers.getContractFactory("SmartCity");
 
-    console.log("SmartCity deployed to:", smartCity.address);
+        console.log("Deploying SmartCity contract...");
+      
+        const smartCity = await SmartCity.deploy();
+
+        
+        await smartCity.deployed();
+
+        console.log("SmartCity deployed successfully to:", smartCity.address);
+    } catch (error) {
+        console.error("Error deploying the SmartCity contract:", error);
+        process.exitCode = 1;
+    }
 }
 
-main().catch((error) => {
-    console.error(error);
+
+main().then(() => {
+    console.log("Deployment script completed.");
+}).catch((error) => {
+    console.error("Unhandled error in script:", error);
     process.exitCode = 1;
 });
