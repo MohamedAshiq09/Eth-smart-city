@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(39, 38, 38, 0.1);
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
@@ -75,7 +75,7 @@ body {
 .btn.vote:hover {
     background-color: #1e88e5;
     transform: scale(1.05);
-    box-shadow: 0 4px 10px rgba(33, 150, 243, 0.5);
+    box-shadow: 0 4px 10px rgba(6, 30, 49, 0.5);
 }
 
 .loading {
